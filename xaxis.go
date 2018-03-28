@@ -144,7 +144,8 @@ func (xa XAxis) Render(r Renderer, canvasBox Box, ra Range, defaults Style, tick
 
 		tickStyle.GetStrokeOptions().WriteToRenderer(r)
 		r.MoveTo(tx, canvasBox.Bottom)
-		r.LineTo(tx, canvasBox.Bottom+DefaultVerticalTickHeight)
+		r.LineTo(tx, canvasBox.Top)
+		//r.LineTo(tx, canvasBox.Bottom+DefaultVerticalTickHeight)
 		r.Stroke()
 
 		tickWithAxisStyle := xa.TickStyle.InheritFrom(xa.Style.InheritFrom(defaults))

@@ -38,6 +38,22 @@ type vectorRenderer struct {
 	fc  *font.Drawer
 }
 
+func (vr *vectorRenderer) Group(name string) {
+	vr.c.Group(name)
+}
+
+func (vr *vectorRenderer) GroupEnd() {
+	vr.c.GroupEnd()
+}
+
+func (c *canvas) Group(name string) {
+	c.w.Write([]byte(fmt.Sprintf(`<g class="%s">`, name) + "\n"))
+}
+
+func (c *canvas) GroupEnd() {
+	c.w.Write([]byte("</g>\n"))
+}
+
 func (vr *vectorRenderer) ResetStyle() {
 	vr.s = &Style{Font: vr.s.Font}
 	vr.fc = nil
@@ -137,7 +153,7 @@ func (vr *vectorRenderer) FillStroke() {
 
 // drawPath draws a path.
 func (vr *vectorRenderer) drawPath(s Style) {
-	vr.c.Path(strings.Join(vr.p, "\n"), vr.s.GetFillAndStrokeOptions())
+	vr.c.Path(strings.Join(vr.p, " ")+"\n", vr.s.GetFillAndStrokeOptions())
 	vr.p = []string{} // clear the path
 }
 
@@ -168,6 +184,8 @@ func (vr *vectorRenderer) Text(body string, x, y int) {
 
 // MeasureText uses the truetype font drawer to measure the width of text.
 func (vr *vectorRenderer) MeasureText(body string) (box Box) {
+	bodyLines := strings.Split(body, "\n")
+	longest := findLongestLine(bodyLines)
 	if vr.s.GetFont() != nil {
 		vr.fc = &font.Drawer{
 			Face: truetype.NewFace(vr.s.GetFont(), &truetype.Options{
@@ -175,16 +193,27 @@ func (vr *vectorRenderer) MeasureText(body string) (box Box) {
 				Size: vr.s.FontSize,
 			}),
 		}
-		w := vr.fc.MeasureString(body).Ceil()
+		w := vr.fc.MeasureString(bodyLines[longest]).Ceil()
 
 		box.Right = w
-		box.Bottom = int(drawing.PointsToPixels(vr.dpi, vr.s.FontSize))
+		box.Bottom = int(drawing.PointsToPixels(vr.dpi, vr.s.FontSize)) * len(bodyLines)
 		if vr.c.textTheta == nil {
 			return
 		}
 		box = box.Corners().Rotate(util.Math.RadiansToDegrees(*vr.c.textTheta)).Box()
 	}
 	return
+}
+
+func findLongestLine(lines []string) int {
+	longest := 0
+	for pos, line := range lines {
+		if len(lines[longest]) < len(line) {
+			longest = pos
+		}
+	}
+
+	return longest
 }
 
 // SetTextRotation sets the text rotation.
@@ -222,7 +251,9 @@ type canvas struct {
 func (c *canvas) Start(width, height int) {
 	c.width = width
 	c.height = height
-	c.w.Write([]byte(fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="%d" height="%d">\n`, c.width, c.height)))
+	c.w.Write([]byte(fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 %d %d">`+"\n", c.width, c.height)))
+
+	c.w.Write([]byte(`<style> .annotation-text {display:none;} .annotation:hover .annotation-text {display: block;}</style>` + "\n"))
 }
 
 func (c *canvas) Path(d string, style Style) {
@@ -230,24 +261,37 @@ func (c *canvas) Path(d string, style Style) {
 	if len(style.StrokeDashArray) > 0 {
 		strokeDashArrayProperty = c.getStrokeDashArray(style)
 	}
-	c.w.Write([]byte(fmt.Sprintf(`<path %s d="%s" style="%s"/>`, strokeDashArrayProperty, d, c.styleAsSVG(style))))
+	c.w.Write([]byte(fmt.Sprintf(`<path %s d="%s" style="%s"/>`, strokeDashArrayProperty, d, c.styleAsSVG(style)) + "\n"))
 }
 
 func (c *canvas) Text(x, y int, body string, style Style) {
 	if c.textTheta == nil {
-		c.w.Write([]byte(fmt.Sprintf(`<text x="%d" y="%d" style="%s">%s</text>`, x, y, c.styleAsSVG(style), body)))
+		c.w.Write([]byte(fmt.Sprintf(`<text x="%d" y="%d" style="%s">`, x, y, c.styleAsSVG(style))))
 	} else {
 		transform := fmt.Sprintf(` transform="rotate(%0.2f,%d,%d)"`, util.Math.RadiansToDegrees(*c.textTheta), x, y)
-		c.w.Write([]byte(fmt.Sprintf(`<text x="%d" y="%d" style="%s"%s>%s</text>`, x, y, c.styleAsSVG(style), transform, body)))
+		c.w.Write([]byte(fmt.Sprintf(`<text x="%d" y="%d" style="%s"%s>`, x, y, c.styleAsSVG(style), transform)))
 	}
+
+	bodyLines := strings.Split(body, "\n")
+	for pos, line := range bodyLines {
+		dy := .7
+		if pos > 0 {
+			dy = 1
+		}
+
+		c.w.Write([]byte(fmt.Sprintf(`<tspan x="%d" dy="%vem">%s</tspan>`, x, dy, line)))
+	}
+
+	c.w.Write([]byte(`</text>`))
+
 }
 
 func (c *canvas) Circle(x, y, r int, style Style) {
-	c.w.Write([]byte(fmt.Sprintf(`<circle cx="%d" cy="%d" r="%d" style="%s"/>`, x, y, r, c.styleAsSVG(style))))
+	c.w.Write([]byte(fmt.Sprintf(`<circle cx="%d" cy="%d" r="%d" style="%s"/>`, x, y, r, c.styleAsSVG(style)) + "\n"))
 }
 
 func (c *canvas) End() {
-	c.w.Write([]byte("</svg>"))
+	c.w.Write([]byte("\n</svg>"))
 }
 
 // getStrokeDashArray returns the stroke-dasharray property of a style.

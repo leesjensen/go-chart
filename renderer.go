@@ -81,6 +81,9 @@ type Renderer interface {
 	// ClearTextRotation clears rotation.
 	ClearTextRotation()
 
+	Group(name string)
+	GroupEnd()
+
 	// Save writes the image to the given writer.
 	Save(w io.Writer) error
 }

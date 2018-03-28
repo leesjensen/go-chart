@@ -59,31 +59,31 @@ func (d draw) LineSeries(r Renderer, canvasBox Box, xrange, yrange Range, style 
 		r.Stroke()
 	}
 
-	if style.ShouldDrawDot() {
-		defaultDotWidth := style.GetDotWidth()
+	// if style.ShouldDrawDot() {
+	// 	defaultDotWidth := style.GetDotWidth()
 
-		style.GetDotOptions().WriteDrawingOptionsToRenderer(r)
-		for i := 0; i < vs.Len(); i++ {
-			vx, vy = vs.GetValues(i)
-			x = cl + xrange.Translate(vx)
-			y = cb - yrange.Translate(vy)
+	// 	style.GetDotOptions().WriteDrawingOptionsToRenderer(r)
+	// 	for i := 0; i < vs.Len(); i++ {
+	// 		vx, vy = vs.GetValues(i)
+	// 		x = cl + xrange.Translate(vx)
+	// 		y = cb - yrange.Translate(vy)
 
-			dotWidth := defaultDotWidth
-			if style.DotWidthProvider != nil {
-				dotWidth = style.DotWidthProvider(xrange, yrange, i, vx, vy)
-			}
+	// 		dotWidth := defaultDotWidth
+	// 		if style.DotWidthProvider != nil {
+	// 			dotWidth = style.DotWidthProvider(xrange, yrange, i, vx, vy)
+	// 		}
 
-			if style.DotColorProvider != nil {
-				dotColor := style.DotColorProvider(xrange, yrange, i, vx, vy)
+	// 		if style.DotColorProvider != nil {
+	// 			dotColor := style.DotColorProvider(xrange, yrange, i, vx, vy)
 
-				r.SetFillColor(dotColor)
-				r.SetStrokeColor(dotColor)
-			}
+	// 			r.SetFillColor(dotColor)
+	// 			r.SetStrokeColor(dotColor)
+	// 		}
 
-			r.Circle(dotWidth, x, y)
-			r.FillStroke()
-		}
-	}
+	// 		r.Circle(dotWidth, x, y)
+	// 		r.FillStroke()
+	// 	}
+	// }
 }
 
 // BoundedSeries draws a series that implements BoundedValuesProvider.
@@ -199,8 +199,12 @@ func (d draw) MeasureAnnotation(r Renderer, canvasBox Box, style Style, lx, ly i
 
 // Annotation draws an anotation with a renderer.
 func (d draw) Annotation(r Renderer, canvasBox Box, style Style, lx, ly int, label string) {
-	style.GetTextOptions().WriteToRenderer(r)
 	defer r.ResetStyle()
+
+	r.Group("annotation")
+
+	r.Group("annotation-text")
+	style.GetTextOptions().WriteToRenderer(r)
 
 	textBox := r.MeasureText(label)
 	textWidth := textBox.Width()
@@ -214,7 +218,7 @@ func (d draw) Annotation(r Renderer, canvasBox Box, style Style, lx, ly int, lab
 	pb := style.Padding.GetBottom(DefaultAnnotationPadding.Bottom)
 
 	textX := lx + pl + DefaultAnnotationDeltaWidth
-	textY := ly + halfTextHeight
+	textY := ly - halfTextHeight
 
 	ltx := lx + DefaultAnnotationDeltaWidth
 	lty := ly - (pt + halfTextHeight)
@@ -239,6 +243,13 @@ func (d draw) Annotation(r Renderer, canvasBox Box, style Style, lx, ly int, lab
 
 	style.GetTextOptions().WriteToRenderer(r)
 	r.Text(label, textX, textY)
+
+	r.GroupEnd()
+
+	style.GetFillAndStrokeOptions().WriteToRenderer(r)
+	r.Circle(5, lx, ly)
+
+	r.GroupEnd()
 }
 
 // Box draws a box with a given style.

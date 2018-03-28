@@ -218,6 +218,12 @@ func (rr *rasterRenderer) ClearTextRotation() {
 	rr.rotateRadians = nil
 }
 
+func (rr *rasterRenderer) Group(name string) {
+}
+
+func (rr *rasterRenderer) GroupEnd() {
+}
+
 // Save implements the interface method.
 func (rr *rasterRenderer) Save(w io.Writer) error {
 	if typed, isTyped := w.(RGBACollector); isTyped {

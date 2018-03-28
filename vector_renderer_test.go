@@ -2,6 +2,7 @@ package chart
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -74,4 +75,31 @@ func TestCanvasStyleSVG(t *testing.T) {
 	assert.True(strings.Contains(svgString, "stroke:rgba(255,255,255,1.0)"))
 	assert.True(strings.Contains(svgString, "stroke-width:5"))
 	assert.True(strings.Contains(svgString, "fill:rgba(255,255,255,1.0)"))
+}
+
+func TestEmptySVG(t *testing.T) {
+	//	assert := assert.New(t)
+
+	graph := Chart{
+		Series: []Series{
+			ContinuousSeries{
+				XValues: []float64{1.0, 2.0},
+				YValues: []float64{0.0, 0.0},
+			},
+		},
+		XAxis: XAxis{
+			Style: StyleShow(),
+		},
+		YAxis: YAxis{
+			Style: StyleShow(),
+			Range: &ContinuousRange{
+				Min: 0.0,
+				Max: 10.0,
+			},
+		},
+	}
+
+	buffer := bytes.NewBuffer([]byte{})
+	graph.Render(SVG, buffer)
+	fmt.Println(string(buffer.Bytes()))
 }

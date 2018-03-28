@@ -180,9 +180,11 @@ func (ya YAxis) Render(r Renderer, canvasBox Box, ra Range, defaults Style, tick
 
 		r.MoveTo(lx, ly)
 		if ya.AxisType == YAxisPrimary {
-			r.LineTo(lx+DefaultHorizontalTickWidth, ly)
+			// r.LineTo(lx+DefaultHorizontalTickWidth, ly)
+			r.LineTo(canvasBox.Left, ly)
 		} else if ya.AxisType == YAxisSecondary {
-			r.LineTo(lx-DefaultHorizontalTickWidth, ly)
+			// r.LineTo(lx-DefaultHorizontalTickWidth, ly)
+			r.LineTo(canvasBox.Right, ly)
 		}
 		r.Stroke()
 
