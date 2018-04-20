@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	assert "github.com/blendlabs/go-assert"
-	"github.com/wcharczuk/go-chart/seq"
+	"github.com/leesjensen/go-chart/seq"
 )
 
 func TestContinuousSeries(t *testing.T) {

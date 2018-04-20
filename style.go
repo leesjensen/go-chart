@@ -6,7 +6,7 @@ import (
 
 	util "github.com/blendlabs/go-util"
 	"github.com/golang/freetype/truetype"
-	"github.com/wcharczuk/go-chart/drawing"
+	"github.com/leesjensen/go-chart/drawing"
 )
 
 const (

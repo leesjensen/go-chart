@@ -7,7 +7,7 @@ import (
 	"math"
 
 	"github.com/golang/freetype/truetype"
-	"github.com/wcharczuk/go-chart/util"
+	"github.com/leesjensen/go-chart/util"
 )
 
 const (

@@ -3,15 +3,15 @@ package main
 import (
 	"net/http"
 
-	"github.com/wcharczuk/go-chart"
-	"github.com/wcharczuk/go-chart/seq"
+	"github.com/leesjensen/go-chart"
+	"github.com/leesjensen/go-chart/seq"
 )
 
 func drawChart(res http.ResponseWriter, req *http.Request) {
 	mainSeries := chart.ContinuousSeries{
 		Name:    "A test series",
 		XValues: seq.Range(1.0, 100.0),
-		YValues: seq.New(seq.NewRandom().WithLen(100).WithAverage(100).WithScale(50)).Array(),
+		YValues: seq.New(seq.NewRandom().WithLen(100)).Array(),
 	}
 
 	minSeries := &chart.MinSeries{

@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/blendlabs/go-assert"
-	"github.com/wcharczuk/go-chart/drawing"
-	"github.com/wcharczuk/go-chart/seq"
+	"github.com/leesjensen/go-chart/drawing"
+	"github.com/leesjensen/go-chart/seq"
 )
 
 func TestChartGetDPI(t *testing.T) {
