@@ -252,9 +252,6 @@ func (c *canvas) Start(width, height int) {
 	c.width = width
 	c.height = height
 	c.w.Write([]byte(fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 %d %d">`+"\n", c.width, c.height)))
-
-	fmt.Println("------------------SVG----------\n", fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 %d %d">`+"\n", c.width, c.height))
-
 	c.w.Write([]byte(`<style> .annotation-text {display:none;} .annotation:hover .annotation-text {display: block;}</style>` + "\n"))
 }
 
